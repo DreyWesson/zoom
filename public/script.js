@@ -6,7 +6,7 @@ myVideo.muted = true;
 let peer = new Peer(undefined, {
   path: "/peerjs",
   host: "/",
-  port: "443",
+  port: "3030",
 });
 
 let myVideoStream;
@@ -27,9 +27,7 @@ navigator.mediaDevices
       });
     });
 
-    socket.on("user-connected", (userId) => {
-      connectToNewUser(userId, stream);
-    });
+    socket.on("user-connected", (userId) => connectToNewUser(userId, stream));
 
     // Message logic
 
@@ -43,29 +41,24 @@ navigator.mediaDevices
       }
     });
     socket.on("createMessage", (msg) => {
-      console.log(msg);
       $(".messages").append(`<li class="message"><b>user</b><br/>${msg}</li>`);
       scrollToBottom();
     });
   });
 
-peer.on("open", (id) => {
-  socket.emit("join-room", ROOM_ID, id);
-});
+peer.on("open", (id) => socket.emit("join-room", ROOM_ID, id));
 
 const connectToNewUser = (userId, stream) => {
   const call = peer.call(userId, stream),
     video = document.createElement("video");
-  call.on("stream", (userVideoStream) => {
-    addVideoStream(video, userVideoStream);
-  });
+  call.on("stream", (userVideoStream) =>
+    addVideoStream(video, userVideoStream)
+  );
 };
 
 const addVideoStream = (video, stream) => {
   video.srcObject = stream;
-  video.addEventListener("loadedmetadata", () => {
-    video.play();
-  });
+  video.addEventListener("loadedmetadata", () => video.play());
   videoGrid.append(video);
 };
 
@@ -77,13 +70,14 @@ const scrollToBottom = () => {
 // Mute video
 const muteControl = () => {
   const enabled = myVideoStream.getAudioTracks()[0].enabled;
-  if (enabled) {
-    myVideoStream.getAudioTracks()[0].enabled = false;
-    setUnmuteButton();
-  } else {
-    setMuteButton();
-    myVideoStream.getAudioTracks()[0].enabled = true;
-  }
+  const muteSwitch = (func, bool) => {
+    myVideoStream.getAudioTracks()[0].enabled = bool;
+    func();
+  };
+
+  enabled
+    ? muteSwitch(setUnmuteButton, false)
+    : muteSwitch(setMuteButton, true);
 };
 
 const setMuteButton = () => {
@@ -105,13 +99,13 @@ const setUnmuteButton = () => {
 
 const playStop = () => {
   let enabled = myVideoStream.getVideoTracks()[0].enabled;
-  if (enabled) {
-    myVideoStream.getVideoTracks()[0].enabled = false;
-    setPlayVideo();
-  } else {
-    setStopVideo();
-    myVideoStream.getVideoTracks()[0].enabled = true;
-  }
+  const playStopSwitch = (func, bool) => {
+    myVideoStream.getVideoTracks()[0].enabled = bool;
+    func();
+  };
+  enabled
+    ? playStopSwitch(setPlayVideo, false)
+    : playStopSwitch(setStopVideo, true);
 };
 
 const setStopVideo = () => {

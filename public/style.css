@@ -5,6 +5,7 @@ body {
 #video__grid {
   display: flex;
   justify-content: center;
+  /* flex-direction: row; */
 }
 video {
   height: 300px;
@@ -108,4 +109,15 @@ video {
 .unmute,
 .stop {
   color: #eb534b;
+}
+
+@media only screen and (min-width: 768px) {
+  /* #video__grid {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  video {
+    padding-bottom: 20px;
+  } */
 }
